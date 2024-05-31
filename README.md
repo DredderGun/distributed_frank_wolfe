@@ -4,6 +4,6 @@ There is implementation of the SONATA (see https://arxiv.org/pdf/2110.12347 for 
 
 The project has Ridge Regression problem, data are prepared step by step as it described in https://arxiv.org/pdf/2110.12347 p.8 (**Ridge Regression**)
 
-### How to see something?
+### How to start project?
 
 You can start with main.py to see some algoritms comparisons

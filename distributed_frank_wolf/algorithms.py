@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 
-def sonata_alg(nodes, graph, x0, maxitrs, solution, epsilon=1e-14, verbose=True, verbskip=1):
+def sonata_alg(nodes, graph, x0, maxitrs, solution, epsilon=1e-6, verbose=True, verbskip=1):
     """
     It is Frank-Wolfe version of SONATA algorithm (see https://doi.org/10.48550/arXiv.1905.02637)
 
@@ -27,7 +27,7 @@ def sonata_alg(nodes, graph, x0, maxitrs, solution, epsilon=1e-14, verbose=True,
     """
     if verbose:
         print("\nFW SONATA algorithm")
-        print("     k      X_k       time")
+        print("     k      X_k       Gap")
 
     start_time = time.time()
     X = np.array([np.zeros(x0.shape[0])] * maxitrs)
@@ -53,14 +53,14 @@ def sonata_alg(nodes, graph, x0, maxitrs, solution, epsilon=1e-14, verbose=True,
         
         # Gradient tracking S.2 (see https://doi.org/10.48550/arXiv.1905.02637 Alg.1)
         grads += (local_grads - local_grads_prev)
-        grads = np.dot(graph.get_adj_mx(), local_grads)
+        grads = np.dot(graph.get_adj_mx(), grads)
 
         X[k] = x_vals.mean(axis=0)
-        gaps[k] = np.sum(np.linalg.norm(x_vals - solution, axis=1)**2) / nodes.shape[0]
+        gaps[k] = np.mean(np.linalg.norm(x_vals - solution, axis=1)**2)
         if verbose and k % verbskip == 0:
-            print("{0:6d}  {1:10.3e}  {2:6.1f}".format(k, np.linalg.norm(X[k]), T[k]))
+            print("{0:6d}  {1:10.3e}  {2:6.1f}".format(k, np.linalg.norm(X[k])**2, gaps[k]))
 
-        if k > 0 and np.linalg.norm(X[k] - X[k - 1]) < epsilon:
+        if k > 0 and abs(gaps[k] - gaps[k - 1]) < epsilon:
             break
 
     X = X[0:k + 1]

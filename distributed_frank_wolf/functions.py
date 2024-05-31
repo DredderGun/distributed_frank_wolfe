@@ -68,7 +68,7 @@ class LegendreFunction(Node):
 
 
 class FWNodeRelativeSmooth(Node):
-    def __init__(self, f, div, lmo, L, gamma=2):
+    def __init__(self, f, div, lmo, L, gamma=2.0):
         assert f is not None
         assert div is not None
         assert lmo is not None
@@ -83,7 +83,10 @@ class FWNodeRelativeSmooth(Node):
     def get_grad(self, x):
         return self.f.func_grad(x, flag=1)
 
-    def get_next_x(self, x, approx_grad, linesearch=False):
+    def get_next_x(self, x, approx_grad, linesearch=False, tol=1e-12):
+        """
+        Just one iteration to get next x
+        """
         if linesearch:
             self.L = self.L / 2
 
@@ -99,7 +102,7 @@ class FWNodeRelativeSmooth(Node):
             x1 = x + alpha_k * d_k
             if not linesearch:
                 break
-            if self.f.func_grad(x1, flag=0) <= fx + alpha_k * grad_d_prod + alpha_k ** self.gamma * self.L * div:
+            if self.f.func_grad(x1, flag=0) <= fx + alpha_k * grad_d_prod + alpha_k ** self.gamma * self.L * div + tol:
                 break
             self.L = self.L * 2
         x = x1
@@ -190,7 +193,7 @@ class SquaredL2Norm(LegendreFunction):
         return y - (1 / L) * g
 
 
-## FW LMO ##
+# FW LMO
 
 
 def lmo_l2_ball(radius, center=None):

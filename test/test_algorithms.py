@@ -2,9 +2,9 @@ import unittest
 
 import numpy as np
 
-from algorithms import sonata_alg
-from functions import Node
-from utils import ErdosRenyiGraph, random_point_in_l2_ball
+from distributed_frank_wolf.algorithms import sonata_alg
+from distributed_frank_wolf.functions import Node
+from distributed_frank_wolf.utils import ErdosRenyiGraph, random_point_in_l2_ball
 
 
 class TestNode(Node):

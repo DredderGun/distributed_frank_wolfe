@@ -111,4 +111,8 @@ junit.xml
 /fake_project
 
 /plots
-matrices_regression.npy
+plots/matrices_regression.npy
+/mag_diploma
+
+matrices_regression*
+FW_matrices_regression*

@@ -3,9 +3,9 @@ import math
 
 import numpy as np
 
-from functions import RidgeRegression, lmo_l2_ball, DistributedRidgeRegressionReferenceFun, SquaredL2Norm, \
+from distributed_frank_wolf.functions import RidgeRegression, lmo_l2_ball, DistributedRidgeRegressionReferenceFun, SquaredL2Norm, \
     FWNodeRelativeSmooth
-from utils import random_point_in_l2_ball, generate_matrix_A, generate_covariance_matrix
+from distributed_frank_wolf.utils import random_point_in_l2_ball, generate_matrix_A, generate_covariance_matrix
 
 
 class TestFunctions(unittest.TestCase):
