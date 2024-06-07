@@ -3,6 +3,17 @@ import random
 import numpy as np
 
 
+def get_matrices_deviation(matrices):
+    """
+    To reduce similarity value:
+    - used 1 norm instead 2 norm
+    - use A - \sum A instead A^T A - \sum A^T A (by definition second way is more correct,
+    but here we want only matrix deviation)
+    """
+    matrices_sum = np.sum(matrices, axis=0)
+    return np.max(np.array([np.linalg.norm(mx - matrices_sum) for mx in matrices])) / 2
+
+
 def save_matrices(matrices, filename):
     np.save(filename, matrices)
 

@@ -5,23 +5,13 @@ import numpy as np
 
 from functions import FWNodeRelativeSmooth, DistributedRidgeRegressionReferenceFun, RidgeRegression, \
     lmo_l2_ball
-from utils import generate_matrix_A, generate_covariance_matrix, load_matrices, save_matrices
-
-
-def get_matrices_deviation(matrices):
-    """
-    To reduce similarity value:
-    - used 1 norm instead 2 norm
-    - use A - \sum A instead A^T A - \sum A^T A (by definition second way is more correct,
-    but here we want only matrix deviation)
-    """
-    matrices_sum = np.sum(matrices, axis=0)
-    return np.max(np.array([np.linalg.norm(mx - matrices_sum) for mx in matrices])) / 2
+from utils import generate_matrix_A, generate_covariance_matrix, load_matrices, save_matrices, get_matrices_deviation
 
 
 def fw_distributed_ridge_regression_problem(d, n, solution,
                                             h, radius, cond_nmbr=1000, node_nmbr=30,
-                                            noise=0.1, lamda=0, similarity_dec_ratio=1):
+                                            noise=0.1, lamda=0, similarity_dec_ratio=1, gamma=2.0,
+                                            filename='../matrices_regression.npy'):
     """
     A ridge regression problem over a network of agents, see description https://arxiv.org/pdf/2110.12347.pdf page 8
     Each node is optimized with Frank-Wolfe method and step with Bregman divergence
@@ -49,7 +39,6 @@ def fw_distributed_ridge_regression_problem(d, n, solution,
     mu0 = 1
     L0 = mu0 * cond_nmbr
 
-    filename = "../FW_matrices_regression.npy"
     if os.path.exists(filename):
         matrices = load_matrices(filename)
         print("Matrices loaded from file.")
@@ -79,7 +68,7 @@ def fw_distributed_ridge_regression_problem(d, n, solution,
         if h is None:
             # \todo refactor this! Find way to plug that reference function
             h = DistributedRidgeRegressionReferenceFun(f, similarity)
-        node = FWNodeRelativeSmooth(f, h, lmo=lmo_l2_ball(radius), L=L)
+        node = FWNodeRelativeSmooth(f, h, lmo=lmo_l2_ball(radius), gamma=gamma, L=L)
         nodes.append(node)
 
     return np.array(nodes)

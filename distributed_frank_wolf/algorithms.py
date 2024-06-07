@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 
-def sonata_alg(nodes, graph, x0, maxitrs, solution, epsilon=1e-6, verbose=True, verbskip=1):
+def sonata_alg(nodes, graph, x0, maxitrs, solution, epsilon=1e-18, verbose=True, verbskip=1):
     """
     It is Frank-Wolfe version of SONATA algorithm (see https://doi.org/10.48550/arXiv.1905.02637)
 

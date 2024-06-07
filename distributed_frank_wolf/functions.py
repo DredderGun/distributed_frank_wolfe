@@ -83,7 +83,7 @@ class FWNodeRelativeSmooth(Node):
     def get_grad(self, x):
         return self.f.func_grad(x, flag=1)
 
-    def get_next_x(self, x, approx_grad, linesearch=False, tol=1e-12):
+    def get_next_x(self, x, approx_grad, linesearch=False, tol=1e-18):
         """
         Just one iteration to get next x
         """
@@ -102,7 +102,7 @@ class FWNodeRelativeSmooth(Node):
             x1 = x + alpha_k * d_k
             if not linesearch:
                 break
-            if self.f.func_grad(x1, flag=0) <= fx + alpha_k * grad_d_prod + alpha_k ** self.gamma * self.L * div + tol:
+            if alpha_k < tol or self.f.func_grad(x1, flag=0) <= fx + alpha_k * grad_d_prod + alpha_k ** self.gamma * self.L * div + tol:
                 break
             self.L = self.L * 2
         x = x1
