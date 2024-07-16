@@ -65,10 +65,11 @@ def fw_distributed_ridge_regression_problem(d, n, solution,
         A = matrices[i]
         b = np.dot(A, solution) + noise * (np.random.rand(n) - 0.001)
         f = RidgeRegression(A, b, lamda)
-        if h is None:
+        if h is None and i == 0:
             # \todo refactor this! Find way to plug that reference function
             h = DistributedRidgeRegressionReferenceFun(f, similarity)
-        node = FWNodeRelativeSmooth(f, h, lmo=lmo_l2_ball(radius), gamma=gamma, L=L)
+            L = similarity
+        node = FWNodeRelativeSmooth(f, h, lmo=lmo_l2_ball(radius), lamda=lamda, gamma=gamma, L=L)
         nodes.append(node)
 
     return np.array(nodes)

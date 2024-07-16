@@ -68,20 +68,24 @@ class LegendreFunction(Node):
 
 
 class FWNodeRelativeSmooth(Node):
-    def __init__(self, f, div, lmo, L, gamma=2.0):
+    def __init__(self, f, h, lmo, L, lamda, gamma=2.0):
         assert f is not None
-        assert div is not None
+        assert h is not None
         assert lmo is not None
 
         self.__prev_grad = None
-        self.div = div
+        self.h = h
         self.lmo = lmo
         self.f = f
         self.L = L
+        self.lamda = lamda
         self.gamma = gamma
 
     def get_grad(self, x):
-        return self.f.func_grad(x, flag=1)
+        return self.f.func_grad(x, flag=1) + self.lamda*x
+
+    def l2_regularization(self, x):
+        return self.lamda * np.linalg.norm(x) ** 2
 
     def get_next_x(self, x, approx_grad, linesearch=False, tol=1e-18):
         """
@@ -92,19 +96,27 @@ class FWNodeRelativeSmooth(Node):
 
         s_k = self.lmo(approx_grad)
         d_k = s_k - x
-        div = self.div.divergence(s_k, x)
+        div = self.h.divergence(s_k, x)
 
         grad_d_prod = np.dot(approx_grad, d_k)
 
-        fx, grad = self.f.func_grad(x)
+        fx = self.f(x) + self.l2_regularization(x)
         while True:
             alpha_k = min((-grad_d_prod / (2 * self.L * div)) ** (1 / (self.gamma - 1)), 1)
             x1 = x + alpha_k * d_k
+
             if not linesearch:
                 break
-            if alpha_k < tol or self.f.func_grad(x1, flag=0) <= fx + alpha_k * grad_d_prod + alpha_k ** self.gamma * self.L * div + tol:
+
+            condition1 = alpha_k < tol
+            condition2 = (self.f(x1) + self.l2_regularization(x1) <=
+                          fx + alpha_k * grad_d_prod + alpha_k ** self.gamma * self.L * div + 1e-13)
+
+            if condition1 or condition2:
                 break
-            self.L = self.L * 2
+
+            self.L *= 2
+
         x = x1
 
         return x
@@ -133,15 +145,15 @@ class RidgeRegression(RSmoothFunction):
         assert x.size == self.d, "RidgeRegression: x.size not equal to n."
         Ax = np.dot(self.A, x)
         if flag == 0:
-            fx = (1 / (2 * self.n)) * np.linalg.norm(Ax - self.b) ** 2 + self.lamda * np.linalg.norm(x) ** 2
+            fx = (1 / (2 * self.n)) * np.linalg.norm(Ax - self.b) ** 2
             return fx
 
-        g = (1 / self.n) * np.dot(self.A.T, (Ax - self.b)) + 2 * self.lamda * x
+        g = (1 / self.n) * np.dot(self.A.T, (Ax - self.b))
         if flag == 1:
             return g
 
         # return both function value and gradient
-        fx = (1 / (2 * self.n)) * sum((Ax - self.b) ** 2) + self.lamda * np.sum(x ** 2)
+        fx = (1 / (2 * self.n)) * sum((Ax - self.b) ** 2)
         return fx, g
 
 

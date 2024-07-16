@@ -11,7 +11,8 @@ def get_matrices_deviation(matrices):
     but here we want only matrix deviation)
     """
     matrices_sum = np.sum(matrices, axis=0)
-    return np.max(np.array([np.linalg.norm(mx - matrices_sum) for mx in matrices])) / 2
+    dev = np.max(np.array([np.linalg.norm(mx - matrices_sum, 2) for mx in matrices])) / 2
+    return dev
 
 
 def save_matrices(matrices, filename):
